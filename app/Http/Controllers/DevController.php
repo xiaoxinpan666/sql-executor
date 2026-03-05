@@ -111,10 +111,12 @@ class DevController extends Controller
         }
 
         try {
-            $results = DB::select(DB::raw($sql));
+            $results = $this->executeSafeSQLWithLaravel($sql);
             return Excel::download(new SqlResultExport($results), 'sql-result-' . time() . '.xlsx');
         } catch (\Exception $e) {
-            return back()->with('error', '导出失败：' . $e->getMessage());
+            return redirect()->route('dev.index')
+            ->with('error', '导出失败：' . $e->getMessage())
+            ->withInput(['sql' => '']);
         }
     }
 
@@ -129,7 +131,8 @@ class DevController extends Controller
         }
 
         try {
-            $results = DB::select(DB::raw($sql));
+            // 修复：直接传入字符串 SQL，移除 DB::raw() 包装
+            $results = DB::select($sql);
             $json = json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
             
             return response($json)
@@ -138,5 +141,10 @@ class DevController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', '导出失败：' . $e->getMessage());
         }
+    }
+
+    public function executeSafeSQLWithLaravel($sql, $params = [])
+    {
+        return DB::statement($sql, $params);
     }
 }
