@@ -21,7 +21,6 @@ class LoginController extends Controller
         return view('auth.login');
     }
 
-    // 处理登录请求
     public function login(Request $request)
     {
         // 验证表单
@@ -29,25 +28,31 @@ class LoginController extends Controller
             'email' => 'required|email',
             'password' => 'required|string|min:6',
         ]);
-
+    
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
-
+    
         // 尝试登录
         $credentials = $request->only('email', 'password');
         if (Auth::attempt($credentials, $request->has('remember'))) {
-            // 登录成功，重定向到 /dev
             $request->session()->regenerate();
-            return redirect()->intended('/dev');
+            
+            // 新增：根据用户类型跳转不同页面
+            if (Auth::user()->is_admin) {
+                // 管理员跳 /dev
+                return redirect()->intended('/dev');
+            } else {
+                // 普通用户跳 /home
+                return redirect()->intended('/home');
+            }
         }
-
+    
         // 登录失败
         return back()->withErrors([
             'email' => '邮箱或密码错误，请重试。',
         ])->withInput();
     }
-
     // 处理登出请求
     public function logout(Request $request)
     {

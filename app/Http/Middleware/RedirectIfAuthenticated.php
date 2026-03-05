@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Providers\RouteServiceProvider;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +20,12 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                return redirect(RouteServiceProvider::HOME);
+                // 已登录用户：管理员跳 /dev，普通用户跳 /home
+                if (Auth::user()->is_admin) {
+                    return redirect('/dev');
+                } else {
+                    return redirect('/home');
+                }
             }
         }
 

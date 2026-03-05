@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\SqlExecutionLog;
@@ -10,18 +11,27 @@ use App\Exports\SqlResultExport;
 
 class DevController extends Controller
 {
+    /**
+     * 构造函数：应用 admin 中间件（确保只有管理员可访问）
+     */
     public function __construct()
     {
-        // 要求登录 + admin 权限
-        $this->middleware(['auth', 'permission:admin']);
+        $this->middleware(['auth', 'admin']);
     }
 
     /**
      * 显示 SQL 执行页面
-     */
+    */
     public function index()
     {
-        return view('dev.index');
+        // 首次加载页面时，传递空的默认变量，避免视图中未定义
+        return view('dev.index', [
+            'error' => null,
+            'results' => null,
+            'headers' => [],
+            'pagination' => [],
+            'sql' => '',
+        ]);
     }
 
     /**
@@ -45,7 +55,7 @@ class DevController extends Controller
         } else {
             try {
                 // 2. 执行 SQL
-                $query = DB::select(DB::raw($sql));
+                $query = DB::select($sql);
                 
                 // 3. 处理分页
                 $perPage = $request->input('per_page', 10);

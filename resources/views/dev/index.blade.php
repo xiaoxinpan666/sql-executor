@@ -70,13 +70,13 @@
         <div class="bg-white rounded-lg shadow-md p-6">
             <h1 class="text-2xl font-bold mb-6">SQL 执行器 (仅允许 SELECT)</h1>
 
-            <!-- 错误提示 -->
-            @if(session('error') || $error ?? null)
-                <div class="alert-error">
-                    <i class="fa-solid fa-circle-exclamation mr-2"></i>
-                    {{ session('error') ?? $error }}
-                </div>
-            @endif
+   <!-- 错误提示 -->
+    @if(session('error') || isset($error) && $error)
+        <div class="alert-error">
+            <i class="fa-solid fa-circle-exclamation mr-2"></i>
+            {{ session('error') ?? $error }}
+        </div>
+    @endif
 
             <!-- SQL 输入表单 -->
             <form id="sqlForm" method="POST" action="{{ route('dev.execute') }}" class="mb-8">
